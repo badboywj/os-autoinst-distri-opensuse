@@ -334,6 +334,7 @@ sub run {
                 record_info 'Conflict rollback', "Rollback patch $patch with conflicting $single_package";
                 assert_script_run("snapper rollback $rollback_number");
                 reboot_and_login;
+                assert_script_run("journalctl --flush");
             }
             disable_test_repositories($repos_count);
         }
