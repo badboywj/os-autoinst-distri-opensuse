@@ -1,4 +1,5 @@
 ControlMaster auto
+ControlPersist 180s
 ControlPath /tmp/ssh_%r_%h_%p
 HostKeyAlgorithms +ssh-rsa
 IdentityFile %SSH_KEY%

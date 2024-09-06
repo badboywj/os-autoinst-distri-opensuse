@@ -48,7 +48,8 @@ sub run {
     # TODO: Use another namespace using team group name
     # Docker image source in https://github.com/ricardobranco777/hawk_test
     # It will be eventually moved to https://github.com/ClusterLabs/hawk/e2e_test
-    my $image = "registry.opensuse.org/devel/openqa/ci/tooling/containers_15_4/hawk_test:latest";
+    # my $image = "registry.opensuse.org/devel/openqa/ci/tooling/containers_15_4/hawk_test:latest";
+    my $image = "registry.opensuse.org/home/jgwang/branches/devel/openqa/ci/tooling/containers_15_4/hawk_test:latest";
 
     assert_script_run("podman pull $image", 240);
 
