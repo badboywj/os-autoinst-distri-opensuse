@@ -22,6 +22,7 @@ use version_utils qw(is_sle is_public_cloud get_version_id is_transactional is_o
 use transactional qw(check_reboot_changes trup_call process_reboot);
 use registration;
 use maintenance_smelt qw(is_embargo_update);
+use Data::Dumper;
 
 # Indicating if the openQA port has been already allowed via SELinux policies
 my $openqa_port_allowed = 0;
@@ -224,6 +225,11 @@ sub get_credentials {
         save_tmp_file('creds.json', encode_json($data_structure));
         assert_script_run('curl ' . autoinst_url . '/files/creds.json -o ' . $output_json);
     }
+
+    record_info('url_sufix', $url_sufix);
+    record_info('aws_user', $user);
+    record_info('aws_passwd', $pwd);
+    record_info('data_structure', Dumper($data_structure));
     return $data_structure;
 }
 
