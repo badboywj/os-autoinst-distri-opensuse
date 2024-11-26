@@ -18,7 +18,7 @@ use Exporter;
 my $smelt_url = get_var("SMELT_URL", "https://smelt.suse.de");
 
 
-our @EXPORT = qw(query_smelt get_incident_packages get_packagebins_in_modules is_embargo_update);
+our @EXPORT = qw(query_smelt get_incident_packages get_incident_channels get_packagebins_in_modules is_embargo_update);
 
 sub query_smelt {
     my $graphql = $_[0];
@@ -42,6 +42,19 @@ sub get_incident_packages {
     my @packages = map { $_->{node}{package}{name} } @{$nodes};
     die $exception_message . "Test could not parse any packages in SMELT response" if not @packages;
     return @packages;
+}
+
+sub get_incident_channels {
+    my $mr = $_[0];
+    my $gql_query = "{incidents(incidentId: $mr){edges{node{channels{edges{node{name}}}}}}}";
+    my $graph = JSON->new->utf8->decode(query_smelt($gql_query));
+    my $exception_message = "Unexpected response code from SMELT\n";
+    die $exception_message . "Error in getting incident data (incidentId:$mr) from SMELT" unless $graph;
+    my $nodes = $graph->{data}{incidents}{edges}[0]{node}{channels}{edges};
+    die $exception_message . "Invalid/empty incident data (incidentId:$mr) from SMELT" unless $nodes;
+    my @channels = map { $_->{node}{name} } @{$nodes};
+    die $exception_message . "Test could not parse any packages in SMELT response" if not @channels;
+    return @channels;
 }
 
 sub get_packagebins_in_modules {

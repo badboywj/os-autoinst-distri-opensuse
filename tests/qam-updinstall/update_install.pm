@@ -58,7 +58,7 @@ use utils;
 use power_action_utils qw(prepare_system_shutdown power_action);
 use List::Util qw(first pairmap uniq notall);
 use qam;
-use maintenance_smelt qw(get_packagebins_in_modules get_incident_packages);
+use maintenance_smelt qw(get_packagebins_in_modules get_incident_packages get_incident_channels);
 use testapi;
 use serial_terminal 'select_serial_terminal';
 use version_utils qw(is_sle);
@@ -208,7 +208,10 @@ sub run {
     foreach (@modules) {
         # substitue SLES_SAP for LTSS repo at this point is SAP ESPOS
         $_ =~ s/SAP_(\d+(-SP\d)?)/$1-LTSS/ if is_sle('15+');
-        $_ =~ s/SAP_(\d+(-SP\d)?)/SERVER_$1-LTSS/ if is_sle('=12-sp5') && !get_var('BUILD') =~ /saptune/;
+
+        # Do not update module name when the package is only from SLE-SAP(not LTSS)
+        my @channels = get_incident_channels($incident_id);
+        $_ =~ s/SAP_(\d+(-SP\d)?)/SERVER_$1-LTSS/ if is_sle('=12-sp5') && (grep { $_ =~ /SERVER_$1-LTSS/ } @channels);
         next if s{http.*SUSE_Updates_(.*)/?}{$1};
         die 'Modules regex failed. Modules could not be extracted from repos variable.';
     }
