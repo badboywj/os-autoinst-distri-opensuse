@@ -313,18 +313,34 @@ sub test_override {
               . "sed -i '/:scripts\\/nr_requests/s/^/#/' Pattern/$SLE/testpattern_note_${note}_a_override ; fi");
     }
     foreach my $override (@overrides) {
+        ### TEST CODE ####
+        script_run("cat /sys/block/sda/queue/nr_requests | cat");
+        script_run("lsblk  -dnro SCHED,TYPE | grep disk | cut -d ' ' -f1 | sort -u | cat");
+
         $self->wrap_script_run("mr_test verify Pattern/${SLE}/testpattern_baseline_Cust");
         $self->wrap_script_run("mr_test dump Pattern/$SLE/testpattern_note_${override}_b > baseline_testpattern_note_${override}_b");
         $self->wrap_script_run("cp Pattern/$SLE/override/$override /etc/saptune/override/$note");
         $self->wrap_script_run("saptune note apply $note");
+        ### TEST CODE ####
+        script_run("cat /sys/block/sda/queue/nr_requests | cat");
+        script_run("lsblk  -dnro SCHED,TYPE | grep disk | cut -d ' ' -f1 | sort -u | cat");
+
         $self->wrap_script_run("mr_test verify Pattern/$SLE/testpattern_note_${override}_a_override");
         $self->wrap_script_run("mr_test verify baseline_testpattern_note_${override}_b");
         tune_baseline("baseline_testpattern_note_${override}_b");
         $self->reboot_wait;
+        ### TEST CODE ####
+        script_run("cat /sys/block/sda/queue/nr_requests | cat");
+        script_run("lsblk  -dnro SCHED,TYPE | grep disk | cut -d ' ' -f1 | sort -u | cat");
+
         $self->wrap_script_run("mr_test verify Pattern/$SLE/testpattern_note_${override}_a_override");
         $self->wrap_script_run("mr_test verify baseline_testpattern_note_${override}_b");
         $self->wrap_script_run("saptune note revert $note");
         $self->wrap_script_run("rm -f /etc/saptune/override/$note");
+        ### TEST CODE ####
+        script_run("cat /sys/block/sda/queue/nr_requests | cat");
+        script_run("lsblk  -dnro SCHED,TYPE | grep disk | cut -d ' ' -f1 | sort -u | cat");
+
         $self->reboot_wait;
     }
 
@@ -429,13 +445,51 @@ sub test_x86_64 {
     $result = "ok";
     $self->result("$result");
 
+    ###### these code only for test #######
+    script_run("echo 'FIRST RECORD BEFORE REBOOT'");
+    script_run("cpupower info | cat");
+    script_run("cpupower frequency-info | cat");
+    script_run("cpupower idle-info | cat");
+    script_run("hexdump -C /dev/cpu_dma_latency | cat");
+    script_run("cat /sys/devices/system/cpu/cpu0/cpuidle/state*/latency | cat");
+    script_run("cat /sys/devices/system/cpu/cpu0/cpuidle/state*/disable | cat");
+    script_run("cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor | cat");
+    script_run("cat /sys/block/sda/queue/nr_requests | cat");
+    script_run("lsblk  -dnro SCHED,TYPE | grep disk | cut -d ' ' -f1 | sort -u | cat");
+    ###### END TEST #######
     # energy_perf_bias=6
     $self->wrap_script_run("cpupower set -b 6");
     # governor=powersave
     $self->wrap_script_run('cpupower frequency-set -g powersave');
     # force_latency=max
     $self->wrap_script_run('cpupower idle-set -E');
+    ###### these code only for test #######
+    script_run("echo 'SECOND RECORD BEFORE REBOOT'");
+    script_run("cpupower info | cat");
+    script_run("cpupower frequency-info | cat");
+    script_run("cpupower idle-info | cat");
+    script_run("hexdump -C /dev/cpu_dma_latency | cat");
+    script_run("cat /sys/devices/system/cpu/cpu0/cpuidle/state*/latency | cat");
+    script_run("cat /sys/devices/system/cpu/cpu0/cpuidle/state*/disable | cat");
+    script_run("cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor | cat");
+    script_run("cat /sys/block/sda/queue/nr_requests | cat");
+    script_run("lsblk  -dnro SCHED,TYPE | grep disk | cut -d ' ' -f1 | sort -u | cat");
+    ###### END TEST #######
+    # the reboot is not need here
+    # or the setup from the above cpupower command is invalid
     $self->reboot_wait;
+    ###### these code only for test #######
+    script_run("echo 'FIRST RECORD AFTER REBOOT'");
+    script_run("cpupower info | cat");
+    script_run("cpupower frequency-info | cat");
+    script_run("cpupower idle-info | cat");
+    script_run("hexdump -C /dev/cpu_dma_latency | cat");
+    script_run("cat /sys/devices/system/cpu/cpu0/cpuidle/state*/latency | cat");
+    script_run("cat /sys/devices/system/cpu/cpu0/cpuidle/state*/disable | cat");
+    script_run("cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor | cat");
+    script_run("cat /sys/block/sda/queue/nr_requests | cat");
+    script_run("lsblk  -dnro SCHED,TYPE | grep disk | cut -d ' ' -f1 | sort -u | cat");
+    ###### END TEST #######
     $self->wrap_script_run("mr_test verify Pattern/$SLE/testpattern_Cust#Intel_1");
     $self->wrap_script_run("saptune note apply $note");
     $self->wrap_script_run("mr_test verify Pattern/$SLE/testpattern_Cust#Intel_2");
