@@ -34,6 +34,7 @@ use publiccloud::ssh_interactive qw(select_host_console);
 use publiccloud::instance;
 use sles4sap;
 use saputils;
+use Data::Dumper;
 
 our @EXPORT = qw(
   run_cmd
@@ -119,6 +120,8 @@ sub run_cmd {
 
     $self->{my_instance}->update_instance_ip();
     $self->{my_instance}->wait_for_ssh(timeout => $timeout);
+    record_info('DataType-jgwang', "Data Type: " . ref($self->{my_instance}));
+    record_info('TEST-jgwang', Dumper($self->{my_instance}));
     my $out = $self->{my_instance}->run_ssh_command(cmd => "sudo $cmd", timeout => $timeout, %args);
     record_info("$title output - $self->{my_instance}->{instance_id}", $out) unless ($timeout == 0 or $args{quiet} or $args{rc_only});
     return $out;
@@ -1501,6 +1504,10 @@ sub wait_for_idle {
     my ($self, %args) = @_;
     my $timeout = $args{timeout} // 240;
 
+    $self->run_cmd(cmd => 'sed -i "s|/bin/bash.*$|/bin/bash -x|" /usr/sbin/cs_clusterstate', timeout => $timeout);
+    $self->run_cmd(cmd => 'cat /usr/sbin/cs_clusterstate | head -2', timeout => $timeout);
+    $self->run_cmd(cmd => 'sed -i "s|/bin/bash.*$|/bin/bash -x|" /usr/sbin/cs_wait_for_idle', timeout => $timeout);
+    $self->run_cmd(cmd => 'cat /usr/sbin/cs_wait_for_idle | head -2', timeout => $timeout);
     my $rc = $self->run_cmd(cmd => 'cs_wait_for_idle --sleep 5', timeout => $timeout, rc_only => 1, proceed_on_failure => 1);
     if ($rc == 124) {
         record_info('WARN cs_wait_for_idle', "cs_wait_for_idle timed out after $timeout. Gathering info and retrying");
