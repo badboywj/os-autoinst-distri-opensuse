@@ -33,7 +33,7 @@ sub run {
 
     # Check cluster state *before* fencing
     barrier_wait("CHECK_BEFORE_FENCING_BEGIN_${cluster_name}_NODE${node_index}");
-    check_cluster_state;
+    check_cluster_state(timeout=>240);
     barrier_wait("CHECK_BEFORE_FENCING_END_${cluster_name}_NODE${node_index}");
 
     # Give time for HANA to replicate the database
