@@ -56,6 +56,10 @@
         content: |||
           #!/usr/bin/env bash
           echo 'PermitRootLogin yes' > /etc/ssh/sshd_config.d/root.conf
+          systemctl enable sshd
+          unlink /etc/resolv.conf
+          ln -sv /run/NetworkManager/resolv.conf /etc/resolv.conf
+          SUSEConnect -r {{SCC_REGCODE_SLES4SAP}} --url {{SCC_URL}}
         |||,
       },
     ],

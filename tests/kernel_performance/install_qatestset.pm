@@ -207,6 +207,10 @@ sub run {
 
     set_selinux;
 
+    my $regcode = get_required_var("SCC_REGCODE_SLES4SAP");
+    my $scc_url = get_required_var("SCC_URL");
+    assert_script_run("SUSEConnect -r $regcode --url $scc_url");
+
     # Add more packages for HANAonKVM with 15SP2
     if (get_var('HANA_PERF') && get_var('VERSION') eq '15-SP2' && get_var('SYSTEM_ROLE') eq 'kvm') {
         zypper_call("install wget iputils supportutils rsync screen smartmontools tcsh");
