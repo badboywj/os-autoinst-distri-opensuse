@@ -56,6 +56,8 @@
         content: |||
           #!/usr/bin/env bash
           echo 'PermitRootLogin yes' > /etc/ssh/sshd_config.d/root.conf
+          systemctl enable sshd
+          SUSEConnect -r {{SCC_REGCODE_SLES4SAP}} -url {{SCC_URL}}
         |||,
       },
     ],
