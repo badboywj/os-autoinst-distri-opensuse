@@ -20,6 +20,8 @@ sub run {
     my ($self, $args) = @_;
     die "tunnel-console requires the TUNNELED=1 setting" unless (is_tunneled());
 
+    assert_script_run('sudo sed -i "/\[Service\]/a ExecStartPre=\nExecStartPre=/usr/bin/sleep 40" /usr/lib/systemd/system/getty@.service', 180);
+    assert_script_run('sudo systemctl daemon-reload', 180);
     # Initialize ssh tunnel for the serial device, if not yet happened
     ssh_interactive_tunnel($args->{my_instance}) if (get_var('_SSH_TUNNELS_INITIALIZED', 0) == 0);
     die("expect ssh serial") unless (get_var('SERIALDEV') =~ /ssh/);
